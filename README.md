@@ -1,1 +1,1 @@
-Readin-time Extension for CNN Indonesia (specifically) website
+## Reading-time Extension for CNN Indonesia (specifically) website
