@@ -11,15 +11,30 @@
     },
     "content_scripts": [
     {
-      "js": ["scripts/content.js"],
+      "js": [
+        "scripts/content.js",
+        "scripts/stock-analysis-ui.js",
+        "scripts/stock-analysis-app.js"
+      ],
       "matches": [
         "https://developer.chrome.com/docs/extensions/*",
         "https://developer.chrome.com/docs/webstore/*",
         "https://www.cnn.com/*",
         "https://www.cnnindonesia.com/*",
         "https://cnnindonesia.com/*",
-        "https://edition.cnn.com/*"
+        "https://edition.cnn.com/*",
+        "https://finance.detik.com/*",
+        "https://ekonomi.kompas.com/*",
+        "https://www.bloomberg.com/*",
+        "https://reuters.com/*"
       ]
     }
+  ],
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*"
   ]
 }

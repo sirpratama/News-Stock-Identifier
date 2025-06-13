@@ -14,9 +14,23 @@ if (!apiKey) {
 
 const ai = new GoogleGenAI({ apiKey });
 
-const articleText = 'Jakarta, CNBC Indonesia — Kerja sama antara bank dan fintech lending semakin erat. Hal ini terlihat dari penyaluran dana bank kepada P2P lending. Menurut Kepala Eksekutif Pengawas Perbankan Dian Ediana Rae, kerja sama antara bank dengan fintech merupakan salah satu business opportunity yang turut serta memberikan kontribusi dalam fungsi intermediasi, terutama dalam menjangkau segmen UMKM. Ia mengungkapkan, per Februari 2025, total penyaluran pinjaman kepada financial technology (fintech) mencapai Rp80,07 triliun. Dari jumlah tersebut, kontribusi pemberi pinjaman yang berasal dari perbankan mencapai Rp49,40 triliun atau sebesar 61,69% terhadap total penyaluran pinjaman. Penyaluran tersebut menunjukkan peningkatan dibandingkan dengan posisi Desember 2024, yaitu sebesar Rp46,07 triliun atau sebesar 59,88% dari total penyaluran pinjaman yang sebesar Rp76,95 triliun. "Sinergi ini diharapkan dapat meningkatkan akses dan layanan keuangan bagi masyarakat dalam rangka mendukung pendalaman dan perluasan inklusi keuangan," ujarnya dalam keterangannya, Jumat (13/6). Dian mengatakan, perbankan diharapkan dapat memperkuat pengelolaan risiko kredit dan penerapan tata kelola (good governance) yang baik dalam penyaluran kredit kepada dan/atau melalui perusahaan P2P lending sebagai mitra. "Untuk menjaga pertumbuhan yang berkesinambungan ini, maka dilakukan antara lain evaluasi secara berkala terhadap kerjasama dengan Mitra, termasuk penilaian terhadap kinerja dan kelayakan Mitra," sebutnya. Sebagai salah satu bentuk dukungan lebih lanjut, Ia menambahkan, OJK telah menerbitkan pedoman mengenai kerjasama antara Bank dengan fintech yang dapat digunakan sebagai panduan dalam memberikan professional judgement terhadap kebutuhan kerjasama tersebut. "Dengan demikian, kerjasama yang terjalin tetap dalam koridor penerapan prinsip kehati-hatian dan tata kelola yang baik," pungkasnya.';
+// Default article text for testing when no article is provided
+const defaultArticleText = 'Sample financial news article for testing';
+
+// Global variable to store article text from bridge
+let currentArticleText = '';
+
+// Function to set article text (called by bridge)
+export function setCurrentArticleText(text) {
+  currentArticleText = text;
+}
 
 async function main() {
+  // Use provided article text, or default for testing
+  const articleText = currentArticleText || defaultArticleText;
+  
+  console.log(`🤖 Analyzing article (${articleText.length} characters)...`);
+  
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash-preview-05-20",
     contents: `Act as an expert financial analyst. Your task is to analyze the provided news article and identify all relevant publicly traded companies that are likely to be impacted.
@@ -50,10 +64,10 @@ JSON Output Structure:
   }
 ]
 
-Return ONLY the JSON array of results.`,
+IMPORTANT: Return ONLY the JSON array - no markdown, no code blocks, no additional text. Just the raw JSON array starting with [ and ending with ].`,
   });
   const responseText = response.text;
-  console.log(responseText);
+  console.log('📊 Gemini analysis complete:', responseText.substring(0, 200) + '...');
   return responseText;
 }
 
