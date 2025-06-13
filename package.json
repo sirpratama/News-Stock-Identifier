@@ -1,0 +1,25 @@
+{
+  "name": "reading-time---copy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sirpratama/reading-time.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sirpratama/reading-time/issues"
+  },
+  "homepage": "https://github.com/sirpratama/reading-time#readme",
+  "keywords": [],
+  "dependencies": {
+    "@google/genai": "^1.5.0",
+    "yahoo-finance2": "^2.13.3"
+  }
+}
