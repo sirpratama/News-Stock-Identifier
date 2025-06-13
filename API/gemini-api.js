@@ -52,7 +52,15 @@ JSON Output Structure:
 
 Return ONLY the JSON array of results.`,
   });
-  console.log(response.text);
+  const responseText = response.text;
+  console.log(responseText);
+  return responseText;
 }
 
-await main();
+// Export the function for use in other modules
+export { main as getGeminiAnalysis };
+
+// Only run main() when this file is executed directly, not when imported
+if (import.meta.url === `file://${process.argv[1]}`) {
+  await main();
+}
