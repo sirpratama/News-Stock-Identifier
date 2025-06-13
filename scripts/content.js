@@ -196,4 +196,4 @@ if (extractedData) {
   console.log('Full Data Object:', extractedData);
 }
 
-export default extractArticleText;
+// extractArticleText is already available globally via window object

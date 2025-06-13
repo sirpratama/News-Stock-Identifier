@@ -11,12 +11,24 @@ class StockAnalysisApp {
     
     async checkAPIConnection() {
         try {
-            const response = await fetch(`${this.apiBaseUrl}/health`);
+            console.log('🔌 Testing API connection to', this.apiBaseUrl);
+            const response = await fetch(`${this.apiBaseUrl}/health`, {
+                method: 'GET',
+                mode: 'cors'
+            });
+            
             if (response.ok) {
-                console.log('✅ API connection successful');
+                const result = await response.json();
+                console.log('✅ API connection successful:', result.message);
+                return true;
+            } else {
+                console.warn('⚠️ API returned status:', response.status);
+                return false;
             }
         } catch (error) {
-            console.warn('⚠️ API connection failed, will use fallback simulation');
+            console.warn('⚠️ API connection failed:', error.message);
+            console.warn('📋 Make sure your API server is running: node extension-bridge.js');
+            return false;
         }
     }
 
@@ -271,68 +283,105 @@ class StockAnalysisApp {
         return mockAnalysis;
     }
 
-    // Generate mock analysis based on content
+    // Generate improved content-aware analysis
     generateMockAnalysis(content) {
         const contentLower = content.toLowerCase();
         const companies = [];
         
-        // Check for banking/finance keywords and generate relevant companies
-        if (contentLower.includes('bank') || contentLower.includes('fintech')) {
-            companies.push(
-                {
-                    company_name: "Bank Central Asia Tbk",
-                    stock_symbol: "BBCA.JK",
-                    sentiment: "Positive",
-                    impact: "4",
-                    reasoning: "Indonesian bank positioned to benefit from fintech collaboration trends mentioned in the article.",
-                    recommendation: "BUY"
-                },
-                {
-                    company_name: "Bank Rakyat Indonesia Tbk",
-                    stock_symbol: "BBRI.JK",
-                    sentiment: "Positive",
-                    impact: "3",
-                    reasoning: "Major Indonesian bank likely to participate in the banking sector developments discussed.",
-                    recommendation: "BUY"
-                }
-            );
-        }
-
-        if (contentLower.includes('ekonomi') || contentLower.includes('keuangan')) {
+        console.log('🔍 Analyzing content for relevant companies...');
+        
+        // Tesla/Electric Vehicle keywords
+        if (contentLower.includes('tesla') || contentLower.includes('electric vehicle') || 
+            contentLower.includes('ev') || contentLower.includes('battery technology')) {
             companies.push({
-                company_name: "Bank Mandiri Tbk",
-                stock_symbol: "BMRI.JK",
-                sentiment: "Neutral",
-                impact: "2",
-                reasoning: "Large bank with moderate exposure to economic trends mentioned in the article.",
-                recommendation: "HOLD"
+                company_name: "Tesla Inc",
+                stock_symbol: "TSLA",
+                sentiment: "Positive",
+                impact: "5",
+                reasoning: "Direct mention of Tesla or electric vehicle technology in the article.",
+                recommendation: "BUY"
             });
         }
-
-        // Add technology companies if relevant
-        if (contentLower.includes('teknologi') || contentLower.includes('digital')) {
+        
+        // Technology companies
+        if (contentLower.includes('teknologi') || contentLower.includes('digital') || 
+            contentLower.includes('gojek') || contentLower.includes('tokopedia')) {
             companies.push({
                 company_name: "GoTo Gojek Tokopedia Tbk",
                 stock_symbol: "GOTO.JK",
                 sentiment: "Positive",
-                impact: "3",
-                reasoning: "Indonesian tech platform potentially impacted by digital economy trends discussed.",
+                impact: "4",
+                reasoning: "Indonesian tech platform impacted by digital trends discussed in the article.",
                 recommendation: "BUY"
             });
         }
-
-        // Fallback companies if none detected
-        if (companies.length === 0) {
+        
+        // Only add banking companies for banking-related content
+        if (contentLower.includes('bank') && (contentLower.includes('indonesia') || 
+            contentLower.includes('bca') || contentLower.includes('mandiri') || 
+            contentLower.includes('bri') || contentLower.includes('fintech'))) {
             companies.push({
                 company_name: "Bank Central Asia Tbk",
                 stock_symbol: "BBCA.JK",
-                sentiment: "Neutral",
-                impact: "2",
-                reasoning: "General market impact from economic news discussed in the article.",
+                sentiment: "Positive",
+                impact: "3",
+                reasoning: "Indonesian bank likely impacted by banking sector developments mentioned.",
+                recommendation: "BUY"
+            });
+        }
+        
+        // Mining companies for commodity news
+        if (contentLower.includes('mining') || contentLower.includes('commodity') || 
+            contentLower.includes('coal') || contentLower.includes('nickel')) {
+            companies.push({
+                company_name: "Vale Indonesia Tbk",
+                stock_symbol: "INCO.JK",
+                sentiment: "Positive",
+                impact: "3",
+                reasoning: "Indonesian mining company potentially affected by commodity trends discussed.",
                 recommendation: "HOLD"
             });
         }
+        
+        // Telecommunications
+        if (contentLower.includes('telecom') || contentLower.includes('telkomsel') || 
+            contentLower.includes('telecommunications')) {
+            companies.push({
+                company_name: "Telkom Indonesia Tbk",
+                stock_symbol: "TLKM.JK",
+                sentiment: "Neutral",
+                impact: "2",
+                reasoning: "Telecommunications company with potential exposure to trends discussed.",
+                recommendation: "HOLD"
+            });
+        }
+        
+        // Global companies for international news
+        if (contentLower.includes('apple') || contentLower.includes('iphone')) {
+            companies.push({
+                company_name: "Apple Inc",
+                stock_symbol: "AAPL",
+                sentiment: "Positive",
+                impact: "4",
+                reasoning: "Apple directly mentioned or referenced in the article.",
+                recommendation: "BUY"
+            });
+        }
+        
+        // If no specific companies detected, return empty instead of default BBCA
+        if (companies.length === 0) {
+            console.log('📝 No specific companies detected for this article type');
+            return [{
+                company_name: "No specific companies identified",
+                stock_symbol: "N/A",
+                sentiment: "Neutral",
+                impact: "1",
+                reasoning: "This article does not appear to have direct impact on specific publicly traded companies.",
+                recommendation: "N/A"
+            }];
+        }
 
+        console.log(`✅ Found ${companies.length} relevant companies through content analysis`);
         return companies;
     }
 
@@ -343,6 +392,7 @@ class StockAnalysisApp {
             
             const response = await fetch(`${this.apiBaseUrl}/analyze`, {
                 method: 'POST',
+                mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -352,7 +402,8 @@ class StockAnalysisApp {
             });
 
             if (!response.ok) {
-                throw new Error(`API call failed: ${response.status}`);
+                console.error('❌ API HTTP error:', response.status, response.statusText);
+                throw new Error(`API call failed: ${response.status} ${response.statusText}`);
             }
 
             const result = await response.json();
@@ -362,10 +413,11 @@ class StockAnalysisApp {
             return result.analysis || result;
             
         } catch (error) {
-            console.error('❌ Real API call failed:', error);
+            console.error('❌ Real API call failed:', error.message);
+            console.error('🔍 Error type:', error.name);
+            console.warn('🔄 Falling back to improved simulation...');
             
-            // Fallback to simulation only if API is down
-            console.log('🔄 Falling back to simulation...');
+            // Use improved simulation that's content-aware
             return await this.simulateAnalysis(articleContent);
         }
     }
