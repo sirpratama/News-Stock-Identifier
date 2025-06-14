@@ -71,8 +71,79 @@ IMPORTANT: Return ONLY the JSON array - no markdown, no code blocks, no addition
   return responseText;
 }
 
-// Export the function for use in other modules
-export { main as getGeminiAnalysis };
+// Chat function for follow-up questions about stock analysis
+async function getChatResponse(userMessage, context) {
+  console.log(`💬 Processing chat message: ${userMessage.substring(0, 50)}...`);
+  
+  // Check if this is the first message in conversation
+  const isFirstMessage = !context.conversationHistory || context.conversationHistory.length === 0;
+  
+  // Build the system prompt with strict professional guidelines
+  let systemPrompt = `SYSTEM PROMPT: You are an AI Financial Analyst Assistant. Your purpose is to serve as an intelligent, conversational interface for a proprietary stock analysis report. You are objective, data-driven, and cautious. Your knowledge is strictly limited to the single analysis report provided to you for each user query. You do not have access to real-time market data, historical price charts, or any information outside of the provided analysis. Your goal is to explain the contents of the report clearly and concisely, not to provide new insights or advice.
+
+CORE DIRECTIVES & RULES:
+
+1. NON-NEGOTIABLE DISCLAIMER: ${isFirstMessage ? 'Your absolute first response in any conversation, and any time the user asks for advice, must begin with this disclaimer: ' : 'When the user asks for advice, you must include this disclaimer: '}"I am an AI assistant, not a licensed financial advisor. The information I provide is for educational purposes only, based on an automated analysis of a specific news article. It should not be considered financial advice. Please consult with a qualified human professional before making any investment decisions."
+
+2. STRICT DATA SCOPING: You must ONLY use the information contained within the analysis object provided to you. Do not invent, infer, or access any external data. If asked a question that would require information not present in the provided analysis, you must respond: "I do not have access to that information. My knowledge is limited to the specific analysis of the source news article."
+
+3. STRICT PROHIBITION ON ADVICE AND SPECULATION: You MUST refuse to answer any question that asks for financial advice, price predictions, or personal opinions. If the user asks "Should I buy, sell, or hold [stock]?" you must frame it as: "The analysis generated a '[recommendation]' recommendation because..." and never claim it as your own advice. Your refusal response should be: "I cannot provide financial advice or predict future market performance. My purpose is to clarify the results of the automated analysis."
+
+4. SOURCE ATTRIBUTION: Always reference that this analysis is based on automated assessment of the provided news article.
+
+5. INTERACTION STYLE: Maintain a neutral, formal, and educational tone. Use simple and direct language. Break down complex points using bullet points for readability.`;
+
+  // Add article context if available
+  if (context.articleText) {
+    systemPrompt += `\n\nORIGINAL ARTICLE CONTEXT:\n"${context.articleText.substring(0, 1000)}${context.articleText.length > 1000 ? '...' : ''}"`;
+  }
+  
+  // Add analysis results as JSON data
+  if (context.analysisResults && context.analysisResults.length > 0) {
+    systemPrompt += `\n\nSTOCK ANALYSIS DATA (JSON):\n`;
+    context.analysisResults.forEach((stock, index) => {
+      systemPrompt += `Company ${index + 1}:\n`;
+      systemPrompt += `{\n`;
+      systemPrompt += `  "company_name": "${stock.company_name}",\n`;
+      systemPrompt += `  "stock_symbol": "${stock.stock_symbol}",\n`;
+      systemPrompt += `  "sentiment": "${stock.sentiment}",\n`;
+      systemPrompt += `  "impact": "${stock.impact}",\n`;
+      systemPrompt += `  "recommendation": "${stock.recommendation}",\n`;
+      systemPrompt += `  "reasoning": "${stock.reasoning}"`;
+      if (stock.financialData && stock.financialData.currentPrice !== 'N/A') {
+        systemPrompt += `,\n  "current_price": "${stock.financialData.currentPrice}",\n`;
+        systemPrompt += `  "daily_change": "${stock.financialData.dailyChange}"`;
+      }
+      systemPrompt += `\n}\n\n`;
+    });
+  }
+  
+  // Add conversation history if available
+  if (context.conversationHistory && context.conversationHistory.length > 0) {
+    systemPrompt += `\nCONVERSATION HISTORY:\n`;
+    context.conversationHistory.forEach((msg) => {
+      systemPrompt += `${msg.role.toUpperCase()}: ${msg.content}\n`;
+    });
+  }
+  
+  const fullPrompt = `${systemPrompt}
+
+USER QUESTION: ${userMessage}
+
+INSTRUCTIONS: Respond according to your system prompt above. Remember to include the disclaimer if this is the first message or if the user is asking for advice. Stay strictly within the bounds of the provided analysis data. Maintain a professional, educational tone.`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash-preview-05-20",
+    contents: fullPrompt,
+  });
+  
+  const responseText = response.text;
+  console.log('💬 Professional chat response generated:', responseText.substring(0, 100) + '...');
+  return responseText;
+}
+
+// Export the functions for use in other modules
+export { main as getGeminiAnalysis, getChatResponse as getGeminiChatResponse };
 
 // Only run main() when this file is executed directly, not when imported
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -1,7 +1,7 @@
 // Extension API Bridge - Express server to connect browser extension with Gemini + Finance APIs
 import express from 'express';
 import cors from 'cors';
-import { getGeminiAnalysis, setCurrentArticleText } from './gemini-api.js';
+import { getGeminiAnalysis, setCurrentArticleText, getGeminiChatResponse } from './gemini-api.js';
 import yahooFinance from 'yahoo-finance2';
 
 const app = express();
@@ -11,8 +11,9 @@ const port = 3000;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// Store article text temporarily for API processing
+// Store article text and analysis results for chat context
 let currentArticleText = '';
+let lastAnalysisResults = null;
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -126,6 +127,9 @@ app.post('/analyze', async (req, res) => {
 
         console.log('✅ Analysis complete!');
         
+        // Store results for chat context
+        lastAnalysisResults = stocksWithFinancialData;
+        
         // Return combined analysis
         res.json({
             success: true,
@@ -179,6 +183,47 @@ app.get('/stock/:symbol', async (req, res) => {
     }
 });
 
+// New chat endpoint for AI conversations about stock analysis
+app.post('/chat', async (req, res) => {
+    try {
+        const { message, conversationHistory = [] } = req.body;
+        
+        if (!message || message.trim().length === 0) {
+            return res.status(400).json({ 
+                error: 'Message is required' 
+            });
+        }
+
+        console.log(`💬 Received chat message: ${message.substring(0, 100)}...`);
+        
+        // Prepare context for chat
+        const context = {
+            articleText: currentArticleText,
+            analysisResults: lastAnalysisResults,
+            conversationHistory: conversationHistory
+        };
+
+        // Get chat response from Gemini
+        console.log('🤖 Getting AI chat response...');
+        const chatResponse = await getGeminiChatResponse(message, context);
+        
+        console.log('✅ Chat response received');
+        
+        res.json({
+            success: true,
+            response: chatResponse,
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (error) {
+        console.error('Error in /chat endpoint:', error);
+        res.status(500).json({ 
+            error: 'Failed to get chat response',
+            details: error.message 
+        });
+    }
+});
+
 // Start server
 app.listen(port, () => {
     console.log(`🚀 Extension API Bridge running on http://localhost:${port}`);
@@ -187,6 +232,7 @@ app.listen(port, () => {
     console.log(`   GET  /health - Health check`);
     console.log(`   POST /analyze - Analyze article`);
     console.log(`   GET  /stock/:symbol - Get stock data`);
+    console.log(`   POST /chat - Get AI chat response`);
 });
 
 // Graceful shutdown

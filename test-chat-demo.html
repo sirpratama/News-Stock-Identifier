@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Analysis with Professional AI Chat Demo</title>
+</head>
+<body>
+    <h1>Stock Analysis with Professional AI Chat Demo</h1>
+    <p>This page demonstrates the new professional AI chat feature for the stock analysis extension.</p>
+    
+    <div style="margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px;">
+        <h3>How to Test:</h3>
+        <ol>
+            <li><strong>Start the API server:</strong>
+                <br><code>cd API && node extension-bridge.js</code>
+            </li>
+            <li><strong>Load the extension</strong> in your browser</li>
+            <li><strong>Click "📈 Analyze Stocks"</strong> on this page</li>
+            <li><strong>After analysis loads, click "💬 Chat"</strong> button</li>
+            <li><strong>Ask educational questions like:</strong>
+                <ul>
+                    <li>"Explain the reasoning behind Tesla's sentiment rating"</li>
+                    <li>"What does the impact rating of 4/5 mean for this company?"</li>
+                    <li>"Can you clarify the analysis methodology used?"</li>
+                    <li>"What information was used to generate the BUY recommendation?"</li>
+                    <li>"Compare the sentiment analysis between the different companies"</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div style="margin: 20px 0; padding: 20px; background: #f0f8ff; border-radius: 8px;">
+        <h3>🔬 Professional AI Features:</h3>
+        <ul>
+            <li>📋 <strong>Strict Data Scoping</strong> - AI only uses information from the analysis report</li>
+            <li>⚖️ <strong>No Financial Advice</strong> - Educational explanations only, no investment recommendations</li>
+            <li>🛡️ <strong>Mandatory Disclaimers</strong> - Clear warnings about not being licensed financial advice</li>
+            <li>📊 <strong>Analysis Explanation</strong> - Clarifies methodology, reasoning, and terminology</li>
+            <li>🎓 <strong>Educational Focus</strong> - Teaches about analysis concepts rather than giving tips</li>
+        </ul>
+    </div>
+
+    <div style="margin: 20px 0; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px;">
+        <strong>⚠️ Important:</strong> The AI will refuse to answer questions about price predictions, investment advice, or anything requiring external data. It will only explain the provided analysis results.
+    </div>
+
+    <!-- Sample article content for testing -->
+    <article style="margin: 20px 0; padding: 20px; border-left: 4px solid #667eea;">
+        <h2>Tesla Reports Strong Q4 Earnings, Stock Jumps 12%</h2>
+        <p><strong>Published:</strong> January 25, 2024</p>
+        
+        <p>Tesla Inc. (TSLA) reported better-than-expected fourth-quarter earnings yesterday, sending shares soaring 12% in after-hours trading. The electric vehicle giant posted earnings per share of $0.71, beating analyst estimates of $0.64.</p>
+        
+        <p>The company delivered 484,507 vehicles in Q4, a 20% increase from the previous quarter. CEO Elon Musk highlighted the success of the Model Y and announced plans for expanded production at the Austin Gigafactory.</p>
+        
+        <p>"We're seeing unprecedented demand for electric vehicles globally," Musk said during the earnings call. "Our investment in battery technology and autonomous driving capabilities positions us well for 2024."</p>
+        
+        <p>The strong performance also benefited other EV stocks, with Rivian (RIVN) and Lucid Motors (LCID) rising 5% and 7% respectively in extended trading. Traditional automakers like Ford (F) and General Motors (GM) also saw modest gains as investors remain optimistic about the EV sector.</p>
+        
+        <p>Tesla's energy storage division reported record installations, generating $1.4 billion in revenue. The company's solar panel business also showed improvement with 35% growth year-over-year.</p>
+        
+        <p>Looking ahead, Tesla plans to begin production of the Cybertruck at scale and expects to maintain vehicle delivery growth of at least 20% annually. The company also announced a $25 billion investment in charging infrastructure across North America.</p>
+    </article>
+
+    <div style="margin: 20px 0; padding: 20px; background: #e8f5e8; border-radius: 8px;">
+        <h3>✅ Example Professional Questions:</h3>
+        <ul>
+            <li><strong>Analysis Explanation:</strong> "What factors contributed to Tesla's positive sentiment rating?"</li>
+            <li><strong>Methodology:</strong> "How is the impact score calculated?"</li>
+            <li><strong>Data Clarification:</strong> "What does the reasoning field mean for each company?"</li>
+            <li><strong>Comparison:</strong> "Compare the analysis results between Tesla and its competitors"</li>
+        </ul>
+        
+        <h3>❌ Questions the AI Will Refuse:</h3>
+        <ul>
+            <li>"Should I buy Tesla stock?"</li>
+            <li>"Will Tesla's stock price go up?"</li>
+            <li>"What's the price target for TSLA?"</li>
+            <li>"Is this a good time to invest?"</li>
+        </ul>
+    </div>
+
+    <!-- Load the extension scripts -->
+    <script src="scripts/stock-analysis-ui.js"></script>
+    <script src="scripts/stock-analysis-app.js"></script>
+    <script>
+        // Initialize the extension when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof StockAnalysisApp !== 'undefined') {
+                window.stockAnalysisApp = new StockAnalysisApp();
+                window.stockAnalysisApp.init();
+                console.log('✅ Stock Analysis Extension with Professional AI Chat initialized');
+            }
+        });
+    </script>
+</body>
+</html> 
